@@ -1,20 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "target": "ESNext",
+    "module": "NodeNext",      // O 'bundler' exige módulos modernos
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true, // Útil para bundlers
+    "noEmit": true,                     // Geralmente bundlers lidam com a transpilação
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": false,
     "skipLibCheck": true,
     "sourceMap": true,
-    "declaration": true,
     "jsx": "react-jsx",
-    "noUncheckedIndexedAccess": false,
-    "exactOptionalPropertyTypes": false,
-    "verbatimModuleSyntax": false,
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

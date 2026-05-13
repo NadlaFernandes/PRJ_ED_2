@@ -3,27 +3,24 @@ import * as AtendimentoController from './controllers/AtendimentoController';
 
 const router = Router();
 
-// Rota para o Totem: Gerar uma nova senha
 router.post('/senhas', (req: Request, res: Response) => {
-    const { tipo, servico } = req.body;
-    
-    if (!tipo || !servico) {
-        return res.status(400).json({ error: "Tipo e serviço são obrigatórios" });
-    }
-
-    const novaSenha = AtendimentoController.gerarSenha(tipo, servico);
-    return res.status(201).json(novaSenha);
+  const { tipo, servico } = req.body;
+  const nova = AtendimentoController.gerarSenha(tipo, servico);
+  return res.status(201).json(nova);
 });
 
-// Rota para o Atendente: Chamar a próxima senha
-router.get('/senhas/proximo', (req: Request, res: Response) => {
-    const proxima = AtendimentoController.chamarProximo();
-    
-    if (!proxima) {
-        return res.status(404).json({ message: "Não há senhas na fila" });
-    }
+router.get('/atender', (req: Request, res: Response) => {
+  const proxima = AtendimentoController.chamarProximo();
+  if (!proxima) return res.status(404).json({ msg: "Fila vazia" });
+  return res.json(proxima);
+});
 
-    return res.json(proxima);
+router.get('/senhas/ultima-chamada', (req: Request, res: Response) => {
+  return res.json(AtendimentoController.obterUltimaChamada());
+});
+
+router.get('/fila', (req: Request, res: Response) => {
+  return res.json(AtendimentoController.listarFila());
 });
 
 export default router;

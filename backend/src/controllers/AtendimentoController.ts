@@ -1,39 +1,43 @@
-import { Queue, MyNode } from "../structures/queue";
-import { Senha, CategoriaSenha, TipoServico } from "../models/Senha";
+interface Senha {
+  id: number;
+  tipo: 'normal' | 'preferencial';
+  servico: string;
+  status: 'aguardando' | 'atendido';
+}
 
-// Instanciando as duas filas
-const filaNormal = new Queue<Senha>();
-const filaPreferencial = new Queue<Senha>();
+const fila: Senha[] = [];
+let ultimaSenhaChamada: Senha | null = null;
 
-export const gerarSenha = (tipo: CategoriaSenha, servico: TipoServico) => {
-    // Gerar ID não sequencial (exemplo simples)
-    const idAleatorio = Math.random().toString(36).substring(2, 6).toUpperCase();
-    
-    const novaSenha: Senha = {
-        id: idAleatorio,
-        tipo,
-        servico,
-        horaGeracao: new Date()
-    };
-
-    const node = new MyNode<Senha>(novaSenha);
-
-    if (tipo === 'preferencial') {
-        filaPreferencial.add(node);
-    } else {
-        filaNormal.add(node);
-    }
-
-    return novaSenha;
+export const gerarSenha = (tipo: 'normal' | 'preferencial', servico: string) => {
+  const novaSenha: Senha = {
+    id: Math.floor(1000 + Math.random() * 9000), // ID aleatório
+    tipo,
+    servico,
+    status: 'aguardando'
+  };
+  fila.push(novaSenha);
+  return novaSenha;
 };
 
 export const chamarProximo = () => {
-    // REGRA DO PROJETO: Preferencial sempre antes do normal
-    if (!filaPreferencial.isEmpty()) {
-        return filaPreferencial.remove().value;
-    }
-    if (!filaNormal.isEmpty()) {
-        return filaNormal.remove().value;
-    }
-    return null; // Ninguém na fila
+  // Busca preferencial primeiro
+  let index = fila.findIndex(s => s.tipo === 'preferencial' && s.status === 'aguardando');
+  
+  // Se não achar, busca o normal
+  if (index === -1) {
+    index = fila.findIndex(s => s.status === 'aguardando');
+  }
+
+  if (index !== -1) {
+    fila[index].status = 'atendido';
+    ultimaSenhaChamada = fila[index];
+    return fila[index];
+  }
+  return null;
+};
+
+export const obterUltimaChamada = () => ultimaSenhaChamada;
+
+export const listarFila = () => {
+  return fila.filter(s => s.status === 'aguardando');
 };
