@@ -1,3 +1,5 @@
+import { MyNode, Queue } from '../structures/queue';
+
 interface Senha {
   id: number;
   tipo: 'normal' | 'preferencial';
@@ -5,7 +7,9 @@ interface Senha {
   status: 'aguardando' | 'atendido';
 }
 
-const fila: Senha[] = [];
+const filaNormal = new Queue<Senha>();
+const filaPreferencial = new Queue<Senha>();
+const senhasGeradas: Senha[] = [];
 let ultimaSenhaChamada: Senha | null = null;
 
 export const gerarSenha = (tipo: 'normal' | 'preferencial', servico: string) => {
@@ -15,29 +19,32 @@ export const gerarSenha = (tipo: 'normal' | 'preferencial', servico: string) => 
     servico,
     status: 'aguardando'
   };
-  fila.push(novaSenha);
+
+  if (tipo === 'preferencial') {
+    filaPreferencial.add(new MyNode(novaSenha));
+  } else {
+    filaNormal.add(new MyNode(novaSenha));
+  }
+
+  senhasGeradas.push(novaSenha);
   return novaSenha;
 };
 
 export const chamarProximo = () => {
-  // Busca preferencial primeiro
-  let index = fila.findIndex(s => s.tipo === 'preferencial' && s.status === 'aguardando');
-  
-  // Se não achar, busca o normal
-  if (index === -1) {
-    index = fila.findIndex(s => s.status === 'aguardando');
+  const fila = filaPreferencial.isEmpty() ? filaNormal : filaPreferencial;
+
+  if (!fila.isEmpty()) {
+    const node = fila.remove();
+    node.value.status = 'atendido';
+    ultimaSenhaChamada = node.value;
+    return node.value;
   }
 
-  if (index !== -1) {
-    fila[index].status = 'atendido';
-    ultimaSenhaChamada = fila[index];
-    return fila[index];
-  }
   return null;
 };
 
 export const obterUltimaChamada = () => ultimaSenhaChamada;
 
 export const listarFila = () => {
-  return fila.filter(s => s.status === 'aguardando');
+  return senhasGeradas.filter(s => s.status === 'aguardando');
 };
